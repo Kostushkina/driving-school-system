@@ -32,3 +32,27 @@ def admission_report(request):
     """API для получения отчета о студентах, готовых к экзамену"""
     report = AdmissionService.get_admission_report()
     return Response(report)
+
+@api_view(['GET'])
+def filter_students(request):
+    """API для фильтрации студентов"""
+    queryset = Student.objects.all()
+
+    group = request.query_params.get('group')
+    if group:
+        queryset = queryset.filter(group=group)
+
+    status = request.query_params.get('status')
+    if status:
+        queryset = queryset.filter(status=status)
+
+    min_attendance = request.query_params.get('min_attendance')
+    if min_attendance:
+        queryset = queryset.filter(attendance_percentage__gte=float(min_attendance))
+
+    is_ready = request.query_params.get('is_ready')
+    if is_ready == 'true':
+        queryset = [s for s in queryset if AdmissionService.check_admission_requirements(s)]
+
+    serializer = StudentRatingSerializer(queryset, many=True)
+    return Response(serializer.data)
