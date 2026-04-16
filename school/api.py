@@ -27,3 +27,8 @@ def student_rating(request):
     students = Student.objects.all()
     serializer = StudentRatingSerializer(students, many=True)
     return Response(serializer.data)
+@api_view(['GET'])
+def admission_report(request):
+    """API для получения отчета о студентах, готовых к экзамену"""
+    report = AdmissionService.get_admission_report()
+    return Response(report)
